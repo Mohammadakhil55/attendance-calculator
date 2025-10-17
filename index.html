@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Calculator - Play Smart, Pass Smart</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0d0d0d 0%, #0e0e0f 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .welcome-screen {
+            text-align: center;
+            color: white;
+            animation: fadeIn 1.5s ease-in;
+        }
+
+        .welcome-screen.hidden {
+            display: none;
+        }
+
+        .quote {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+            line-height: 1.3;
+        }
+
+        .subline {
+            font-size: 1.3rem;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        .calculator-section {
+            display: none;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .calculator-section.visible {
+            display: block;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .card-header h1 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
+
+        .card-header p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .credits {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecf5;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .credits strong {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #0330f8 0%, #2f0cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(27, 65, 234, 0.6);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        .calculate-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .calculate-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .result-section {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f6f8fc 0%, #e9ecf5 100%);
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .result-section.visible {
+            display: block;
+        }
+
+        .result-text {
+            color: #333;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            font-weight: 500;
+        }
+
+        .percentage {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+
+        .voice-indicator {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #6e05a6 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .voice-indicator:hover {
+            transform: scale(1.1);
+        }
+
+        .voice-indicator.speaking {
+            animation: pulse 1s infinite;
+        }
+
+        .voice-icon {
+            width: 30px;
+            height: 30px;
+            fill: white;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error.visible {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 8px 30px rgba(102, 126, 234, 0.8);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .quote {
+                font-size: 1.8rem;
+            }
+
+            .subline {
+                font-size: 1.1rem;
+            }
+
+            .card {
+                padding: 25px;
+            }
+
+            .card-header h1 {
+                font-size: 1.5rem;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .logo {
+                width: 40px;
+                height: 40px;
+            }
+
+            .voice-indicator {
+                bottom: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="welcome-screen" id="welcomeScreen">
+            <div class="quote">Attend the 75% — Bunk the rest.</div>
+            <div class="subline">Play smart, pass smart.</div>
+        </div>
+
+        <div class="calculator-section" id="calculatorSection">
+            <div class="card">
+                <div class="card-header">
+                    <h1>
+                        <img src="aak.png" alt="AK Logo" class="logo">
+                        Attendance Calculator
+                    </h1>
+                    <p>Stay above 75% and bunk the rest</p>
+                </div>
+
+                <div class="input-group">
+                    <label for="totalClasses">Total number of classes held</label>
+                    <input type="number" id="totalClasses" placeholder="e.g., 100" min="1">
+                    <div class="error" id="totalError">Please enter a valid number</div>
+                </div>
+
+                <div class="input-group">
+                    <label for="attendedClasses">Number of classes attended</label>
+                    <input type="number" id="attendedClasses" placeholder="e.g., 80" min="0">
+                    <div class="error" id="attendedError">Please enter a valid number</div>
+                </div>
+
+                <button class="calculate-btn" id="calculateBtn">
+                    <span style="position: relative; z-index: 1;">Calculate</span>
+                </button>
+
+                <div class="result-section" id="resultSection">
+                    <div class="result-text" id="resultText"></div>
+                </div>
+
+                <div class="credits">
+                    Developed by <strong>Mohammad Akhil</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="voice-indicator" id="voiceIndicator" title="AI Voice Assistant">
+        <svg class="voice-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+            <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+        </svg>
+    </div>
+
+    <script>
+        let isSpeaking = false;
+        const synth = window.speechSynthesis;
+
+        function speak(text) {
+            if (synth.speaking) {
+                synth.cancel();
+            }
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            utterance.volume = 1;
+
+            const voiceIndicator = document.getElementById('voiceIndicator');
+            
+            utterance.onstart = () => {
+                isSpeaking = true;
+                voiceIndicator.classList.add('speaking');
+            };
+
+            utterance.onend = () => {
+                isSpeaking = false;
+                voiceIndicator.classList.remove('speaking');
+            };
+
+            synth.speak(utterance);
+        }
+
+        setTimeout(() => {
+            speak("Hi there! Ready to play smart and pass smart? Let's check your attendance.");
+        }, 500);
+
+        setTimeout(() => {
+            document.getElementById('welcomeScreen').classList.add('hidden');
+            document.getElementById('calculatorSection').classList.add('visible');
+        }, 3000);
+
+        document.getElementById('calculateBtn').addEventListener('click', () => {
+            const totalClasses = parseFloat(document.getElementById('totalClasses').value);
+            const attendedClasses = parseFloat(document.getElementById('attendedClasses').value);
+            
+            const totalError = document.getElementById('totalError');
+            const attendedError = document.getElementById('attendedError');
+            const resultSection = document.getElementById('resultSection');
+            const resultText = document.getElementById('resultText');
+
+            totalError.classList.remove('visible');
+            attendedError.classList.remove('visible');
+
+            let hasError = false;
+
+            if (!totalClasses || totalClasses < 1) {
+                totalError.classList.add('visible');
+                hasError = true;
+            }
+
+            if (isNaN(attendedClasses) || attendedClasses < 0) {
+                attendedError.classList.add('visible');
+                hasError = true;
+            }
+
+            if (attendedClasses > totalClasses) {
+                attendedError.textContent = 'Cannot exceed total classes';
+                attendedError.classList.add('visible');
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            const currentPercentage = (attendedClasses / totalClasses) * 100;
+            const targetPercentage = 75;
+
+            let resultMessage = '';
+            let voiceMessage = '';
+
+            resultMessage += `<div>Your current attendance is <span class="percentage">${currentPercentage.toFixed(2)}%</span>.</div><br>`;
+
+            if (currentPercentage >= targetPercentage) {
+                const canBunk = Math.floor((attendedClasses - 0.75 * totalClasses) / 0.75);
+                
+                if (canBunk > 0) {
+                    resultMessage += `<div> You can still bunk <span class="percentage">${canBunk}</span> more ${canBunk === 1 ? 'class' : 'classes'} to maintain 75%.</div>`;
+                    voiceMessage = `Your current attendance is ${currentPercentage.toFixed(1)} percent. You can still bunk ${canBunk} more ${canBunk === 1 ? 'class' : 'classes'} to maintain 75 percent!`;
+                } else {
+                    resultMessage += `<div> You're at the edge!!! Attend classes carefully to maintain 75%.</div>`;
+                    voiceMessage = `Your current attendance is ${currentPercentage.toFixed(1)} percent. You're at the edge! Attend classes carefully to maintain 75 percent.`;
+                }
+            } else {
+                const needToAttend = Math.ceil((0.75 * totalClasses - attendedClasses) / 0.25);
+                
+                resultMessage += `<div>You need to attend <span class="percentage">${needToAttend}</span> more ${needToAttend === 1 ? 'class' : 'classes'} consecutively to reach 75%.</div>`;
+                voiceMessage = `Your current attendance is ${currentPercentage.toFixed(1)} percent. You need to attend ${needToAttend} more ${needToAttend === 1 ? 'class' : 'classes'} consecutively to reach 75 percent. Time to catch up!`;
+            }
+
+            resultText.innerHTML = resultMessage;
+            resultSection.classList.add('visible');
+
+            setTimeout(() => {
+                speak(voiceMessage);
+            }, 300);
+        });
+
+        document.getElementById('voiceIndicator').addEventListener('click', () => {
+            const resultText = document.getElementById('resultText').textContent;
+            if (resultText && !isSpeaking) {
+                speak(resultText.replace(/[^\w\s.]/g, ''));
+            }
+        });
+
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('calculateBtn').click();
+            }
+        });
+    </script>
+</body>
+</html>
