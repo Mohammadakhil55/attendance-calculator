@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mohammadakhil55.github.io/attendance-calculator/sitemap.xml
